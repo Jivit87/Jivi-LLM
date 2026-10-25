@@ -23,4 +23,34 @@ class EmbeddingLayer(nn.Module):
         out = self.tok_emb(x) + self.pos_emb(positions)
         return self.drop(out)
 
-        
+
+class LayerNorm(nn.Module):
+    
+    def __init__(self, emb_dim, eps=1e-5):
+        super().__init__()
+        self.eps = eps
+        self.scale = nn.Parameter(torch.ones(emb_dim)) # learnable scaling parameter 
+        self.shift = nn.Parameter(torch.zeros(emb_dim)) # learnable shift parameter
+
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        var = x.var(dim=-1, keepdim=True, unbiased=False)
+        x_norm = (x - mean) / torch.sqrt(var + self.eps)
+        return self.scale * x_norm + self.shift   
+        # we are scaling and adding shifts so that model learn during training and changes paramaters accordignly 
+
+
+class FeedForward(nn.Module):
+
+    def __init__(self, cfg):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(cfg.emb_dim, 4 * cfg.emb_dim),
+            nn.GELU(),
+            nn.Linear(4 * cfg.emb_dim, cfg.emb_dim),
+            nn.Dropout(cfg.dropout) # helps to prevent overfitting 
+        )
+
+    def forward(self, x):
+        return self.net(x)
+    
