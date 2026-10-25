@@ -1,0 +1,8 @@
+# debug.yaml - tiny model for test CPU testing only 
+vocab_size: 50257
+context_length: 64 
+emb_dim: 128 
+n_heads: 4
+n_layers: 2
+dropout: 0.1
+qkv_bias: false
