@@ -53,4 +53,31 @@ class FeedForward(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+class GPTModel(nn.Module):
+
+    def __init__(self, cfg):
+        super().__init__()
+        from jivi_llm.transformer_block import TransformerBlock
+        self.emb = EmbeddingLayer(cfg)
+        
+        # stacking transformer blocks 
+        self.blocks = nn.Sequential(
+            *[TransformerBlock(cfg) for _ in range(cfg.n_layers)]
+        )
+
+        self.ln_final = LayerNorm(cfg.emb_dim)
+
+        # output head: project from emb_dim to vocal logits
+        self.lm_head = nn.Linear(cfg.emb_dim, cfg.vocab_size, bias=False)
+
+    def forward(self, x):
+        # x: (B, T)
+        x = self.emb(x)       # (B, T, C)
+        x = self.blocks(x)    # (B, T, C)
+        x = self.ln_final(x)  # (B, T, C)
+        logits = self.lm_head(x)  # (B, T, vocab_size)
+        return logits
+            
+
     
