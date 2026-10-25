@@ -44,3 +44,30 @@ def test_no_nan_or_inf(cfg, sample_input):
     loss.backward()
     assert not torch.isnan(out).any()
     assert not torch.isinf(out).any()
+
+from jivi_llm.attention import MultiHeadAttention
+
+
+def test_mha_output_shape(cfg, sample_input):
+    # multi-head output must preserve (B, T, C)
+    mha = MultiHeadAttention(cfg)
+    out = mha(sample_input)
+    assert out.shape == sample_input.shape
+
+
+def test_mha_gradients(cfg, sample_input):
+    # gradients must reach all 4 projection matrices
+    mha = MultiHeadAttention(cfg)
+    out = mha(sample_input)
+    out.sum().backward()
+    for name in ["W_q", "W_k", "W_v", "W_o"]:
+        assert getattr(mha, name).weight.grad is not None
+
+
+def test_mha_no_nan_or_inf(cfg, sample_input):
+    # forward pass must be numerically clean
+    mha = MultiHeadAttention(cfg)
+    out = mha(sample_input)
+    assert not torch.isnan(out).any()
+    assert not torch.isinf(out).any()
+
