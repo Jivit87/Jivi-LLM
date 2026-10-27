@@ -1,32 +1,45 @@
 # Jivi-LLM — Improvement Plan
 
 > Ordered from **highest to lowest priority**. Work top to bottom and tick each box when done.
-> This file is a plan only. No code changes are described as already made.
+> This file is a plan only. Items are ticked only when done.
+> **Update (2026-10-27):** a GPU is now available and the corpus has been expanded. The plan below is re-based on that.
 
 ---
 
-## Diagnosis (why the model performs badly)
+## Current setup
 
-Latest run: `logs/run_1793033304.jsonl`, `configs/debug.yaml` (13M params, context 64, 2 layers, emb 128).
+| Item | Value |
+|---|---|
+| GPU | NVIDIA RTX PRO 4000 Blackwell, 24 GB VRAM (torch 2.14 + CUDA 13, `cuda.is_available() == True`) |
+| Corpus | `data/raw/combined.txt`: 115 Gutenberg books, headers/footers stripped, about **25.6M GPT-2 tokens** (94 MB). Built by `download_data.py`; gitignored, regenerate with it |
+| Old corpus | 6 books, about 914K tokens (superseded) |
+| Models | `debug.yaml` (13M, test only), `gpt_124m.yaml` (about 163M untied / 124M tied) |
+
+## Diagnosis (why the model performed badly)
+
+Old run: `logs/run_1793033304.jsonl`, `debug.yaml` (13M params, context 64, 2 layers, emb 128).
 
 | Fact | Value |
 |---|---|
-| Corpus (`data/raw/combined.txt`) | 3.4 MB, about **914K tokens** |
-| Tokens seen in training | 500 steps × 512 = **256K tokens** (about 0.28 epochs) |
+| Tokens seen in training | 500 steps × 512 = **256K tokens** (about 0.28 epochs of the old corpus) |
 | Loss | 10.95 → 5.59 (train), 5.59 (val), still falling |
 
-A loss near 5.5 is roughly the level of a model that only knows word frequencies. It has not learned grammar yet. The model is **under-trained**, with a **small config** and **small data**. The pipeline itself works.
+A loss near 5.5 is roughly the level of a model that only knows word frequencies. It has not learned grammar yet. The model was **under-trained**, with a **small config** and **small data**. The pipeline itself works.
 
-Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would need about 2.5B tokens; we have 0.9M.
+Rule of thumb: a model needs about 20 tokens per parameter. With 25.6M tokens, the right size is about **1–2M parameters at "Chinchilla" optimal, or about 30M if we accept several epochs (10+)**. The 124M model would need about 2.5B tokens; we have 25.6M, so it will overfit on this corpus alone.
+
+The GPU removes the compute limit, so the plan is now: fix the training loop, train a ~30M model for many epochs on the new corpus, then decide whether more data is needed.
 
 ---
 
 ## Priority 1 — HIGH (biggest impact, do first)
 
-### 1.1 Train much longer on the existing corpus
-**Why:** only 0.28 epochs have been seen. This is the main reason the output is bad.
-**What:** run the debug model for 10–20+ epochs (about 10M+ tokens, around 20,000–35,000 steps at batch 8 × 64). Loss should fall well below 5, and samples should start to look like English.
-- [ ] Decide a step or epoch budget (e.g. 20 epochs)
+### 1.1 Train much longer on the new corpus (on the GPU)
+**Why:** only 0.28 epochs of a tiny corpus were seen. This is the main reason the output is bad.
+**What:** train the ~30M config (1.3) on the 25.6M-token corpus for roughly 5–10 epochs (125–250M tokens). At context 256 and batch 64 (16K tokens/step) that is about 8,000–16,000 steps. Loss should fall well below 5, and samples should start to look like English.
+- [x] Corpus expanded to 25.6M tokens (`download_data.py`)
+- [ ] Confirm the training script runs on `cuda` (the current `train()` takes `device`, but nothing has been run on the GPU yet)
+- [ ] Decide a step or epoch budget (e.g. 8 epochs)
 - [ ] Run training with periodic checkpoints (every ~1000 steps)
 - [ ] Confirm val loss keeps falling (watch for the point where val rises while train falls = overfitting)
 - [ ] Record final train/val loss and a sample in the log
@@ -34,16 +47,16 @@ Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would
 ### 1.2 Learning-rate schedule + gradient clipping (`train.py`)
 **Why:** a constant lr of 1e-3 with no warmup is unstable early and sub-optimal late.
 **What:**
-- [ ] Linear warmup for the first ~1–5% of steps
-- [ ] Cosine decay to ~10% of peak lr
-- [ ] Gradient clipping (`clip_grad_norm_`, max norm 1.0)
-- [ ] Log the current lr with every metric line (the plan already requires this)
+- [x] Linear warmup for the first ~1–5% of steps
+- [x] Cosine decay to ~10% of peak lr
+- [x] Gradient clipping (`clip_grad_norm_`, max norm 1.0)
+- [x] Log the current lr with every metric line (the plan already requires this)
 
 ### 1.3 Use a bigger "small" model config
 **Why:** `debug.yaml` (context 64, 2 layers) is a pipeline test config. It is too small for fluent text.
 **What:** add a separate config (do not reuse the debug name), for example `configs/small_30m.yaml`:
 - [ ] context_length 256, n_layers 6, n_heads 6, emb_dim 384 (about 30–40M params)
-- [ ] Verify it fits in memory on the 8 GB Mac with a conservative batch size
+- [ ] Verify it fits on the 24 GB GPU (it should easily; start at batch 64 and measure peak memory)
 - [ ] Check that the config name clearly says it is not the 124M target
 
 ### 1.4 Fix sampling in training-time samples
@@ -59,10 +72,11 @@ Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would
 ## Priority 2 — MEDIUM (data quality and trustworthy measurement)
 
 ### 2.1 Clean the corpus
-**Why:** `combined.txt` contains Project Gutenberg licence headers and footers (12 "PROJECT GUTENBERG" matches). The model learns to generate boilerplate.
-- [ ] Strip text before `*** START OF` and after `*** END OF` in each book
-- [ ] Normalize repeated blank lines and odd whitespace
-- [ ] Re-count tokens and record the number in `data/README.md`
+**Why:** the old `combined.txt` contained Project Gutenberg licence headers and footers. The model learns to generate boilerplate.
+- [x] Strip text before `*** START OF` and after `*** END OF` in each book (done in `download_data.py`; 7 in-text "Project Gutenberg" mentions remain across 94 MB, worth a quick look)
+- [x] Normalize repeated blank lines
+- [x] Re-count tokens: 25,572,763 (record it in `data/README.md`)
+- [ ] Record the token count in `data/README.md`
 - [ ] Update `data/README.md` (it still describes only *The Verdict*) with all sources, licences and token counts
 
 ### 2.2 Better train/validation split
@@ -88,7 +102,7 @@ Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would
 **Why:** `--config` defaults to `debug.yaml`, so loading a different-size checkpoint fails or gives junk.
 - [ ] Read the config stored inside the checkpoint instead of trusting the CLI default
 - [ ] Add `--seed` for reproducible sampling
-- [ ] Add a `--device` option (CPU / MPS), reporting the device used
+- [ ] Add a `--device` option (CPU / CUDA), defaulting to CUDA when available, and report the device used
 
 ---
 
@@ -122,15 +136,17 @@ Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would
 ### 4.1 Efficiency
 - [ ] Use `F.scaled_dot_product_attention` (fused causal attention) instead of the manual mask
 - [ ] Use mixed precision (`torch.autocast`, bf16) on the GPU
-- [ ] Add gradient accumulation to get larger effective batches on 8 GB
+- [ ] Add gradient accumulation only if a larger effective batch is needed (24 GB is plenty for the 30M model)
+- [ ] Try `torch.compile` and measure the speedup
 - [ ] Benchmark tokens/second and peak memory, then record them
 - [ ] Tokenize once and cache the IDs in `data/processed/` instead of re-encoding on every run
 
-### 4.2 Move to the real 124M run (RTX 4090)
+### 4.2 Move to the real 124M run (same 24 GB GPU)
 **Only after** priorities 1–3 are done and the small model clearly learns.
-- [ ] Gather a much larger legal corpus (hundreds of millions of tokens, e.g. OpenWebText or similar)
+- [ ] Gather a much larger legal corpus (hundreds of millions to billions of tokens, e.g. FineWeb-Edu or OpenWebText). Gutenberg alone (25.6M) is too small for 124M
 - [ ] Document source, licence, size, dedup and split
-- [ ] Verify CUDA/PyTorch compatibility, VRAM and disk, and set up remote checkpoint backup
+- [x] CUDA/PyTorch compatibility verified (torch 2.14 + CUDA 13, RTX PRO 4000 Blackwell, 24 GB); about 425 GB disk free
+- [ ] Set up checkpoint backup
 - [ ] Benchmark first, then pick a token budget based on measured throughput
 - [ ] Be honest in the write-up about what the model can and cannot do
 
@@ -146,10 +162,12 @@ Rule of thumb: a model needs about 20 tokens per parameter. The 124M model would
 
 ## Suggested execution order
 
-1. 1.2 → 1.4 → 1.1: scheduler and clipping, better samples, then a long run on the current setup. This gives a quick win and a baseline.
-2. 2.1 → 2.2 → 2.3: clean data, fix split, steadier evaluation.
-3. 1.3 + 3.x: bigger config and model tricks, compared against the baseline.
-4. 2.4 / 2.5, then 4.x: resume wiring, tooling, then the scale-up.
+1. 1.2 → 1.4: scheduler and clipping, better samples (small `train.py` changes).
+2. 1.3 + 4.1 (bf16 / fused attention): the 30M config and GPU efficiency.
+3. 1.1: the first long run on the GPU, which gives the baseline.
+4. 2.2 → 2.3: fix the split and evaluation so the baseline is trustworthy.
+5. 3.x: model tricks, each compared against the baseline.
+6. 2.4 / 2.5, then 4.2: resume wiring, tooling, then the scale-up with more data.
 
 ## How to know it worked
 
