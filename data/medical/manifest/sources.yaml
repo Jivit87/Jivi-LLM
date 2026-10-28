@@ -1,0 +1,28 @@
+# Planned sources for the medical corpus. Update status as each is downloaded.
+# status: planned | downloading | done | dropped
+target_unique_tokens: 500_000_000
+sources:
+  - name: pmc_oa
+    via: almanach/Biomed-Enriched (commercial split)   # fallback: common-pile/pubmed
+    share: 0.55
+    status: planned
+  - name: pubmed_abstracts
+    via: https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+    share: 0.12
+    status: planned
+  - name: guidelines
+    via: epfl-llm/guidelines
+    share: 0.05
+    status: planned
+  - name: reference
+    via: medlineplus (public-domain parts), wikipedia medicine, bookshelf OA, openfda
+    share: 0.08
+    status: planned
+  - name: medical_web
+    via: FineWeb-Edu filtered by embedding similarity to medical QA
+    share: 0.05
+    status: planned
+  - name: general_replay
+    via: FineWeb-Edu / Wikipedia
+    share: 0.15
+    status: planned

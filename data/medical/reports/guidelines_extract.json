@@ -1,0 +1,56 @@
+{
+  "cco": {
+    "seen": 87,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "cdc": {
+    "seen": 621,
+    "kept": 615,
+    "chars": 44661397,
+    "est_tokens": 10633665
+  },
+  "cma": {
+    "seen": 432,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "icrc": {
+    "seen": 49,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "nice": {
+    "seen": 1656,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "pubmed": {
+    "seen": 1627,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "spor": {
+    "seen": 217,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "who": {
+    "seen": 223,
+    "kept": 0,
+    "chars": 0,
+    "est_tokens": 0
+  },
+  "wikidoc": {
+    "seen": 33058,
+    "kept": 24900,
+    "chars": 223594578,
+    "est_tokens": 53236804
+  }
+}

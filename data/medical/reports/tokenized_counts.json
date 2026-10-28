@@ -1,0 +1,41 @@
+{
+  "vocab_size": 32000,
+  "eot_id": 0,
+  "dtype": "uint16",
+  "tokenizer_sha256": "c5dcece79e6bbfa109f8b2e09992ab2d07ff148c9c60948293e8b00b8dc94f1f",
+  "val_percent": 2,
+  "sources": {
+    "pmc_oa": {
+      "train_tokens": 303358750,
+      "val_tokens": 5899332,
+      "train_docs": 43008,
+      "val_docs": 843
+    },
+    "pubmed_abstracts": {
+      "train_tokens": 50964418,
+      "val_tokens": 1013583,
+      "train_docs": 143465,
+      "val_docs": 2857
+    },
+    "guidelines": {
+      "train_tokens": 57006418,
+      "val_tokens": 1239423,
+      "train_docs": 24977,
+      "val_docs": 510
+    },
+    "reference": {
+      "train_tokens": 6045484,
+      "val_tokens": 119862,
+      "train_docs": 1707,
+      "val_docs": 36
+    },
+    "general_replay": {
+      "train_tokens": 75718758,
+      "val_tokens": 1650163,
+      "train_docs": 56692,
+      "val_docs": 1180
+    }
+  },
+  "total_train_tokens": 493093828,
+  "total_val_tokens": 9922363
+}

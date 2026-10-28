@@ -1,0 +1,10 @@
+# med_124m.yaml - medical-domain GPT, about 124.6M params (tied embeddings), 32k medical BPE vocab
+# Tokenizer: data/medical/tokenizer/med_bpe_32k.json ; data: data/medical/tokenized/ (see med_domain.md)
+vocab_size: 32000
+context_length: 1024
+emb_dim: 768
+n_heads: 12
+n_layers: 14
+dropout: 0.1
+qkv_bias: false
+tie_weights: true

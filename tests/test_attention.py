@@ -71,3 +71,59 @@ def test_mha_no_nan_or_inf(cfg, sample_input):
     assert not torch.isnan(out).any()
     assert not torch.isinf(out).any()
 
+
+
+# ---- fused attention (scaled_dot_product_attention) must match the original manual math ----
+
+def _manual_mha_forward(mha, x):
+    # the ORIGINAL implementation (now kept as a comment in attention.py), used here as the reference
+    B, T, C = x.shape
+    H, d = mha.n_heads, mha.d_head
+    Q = mha.W_q(x).view(B, T, H, d).transpose(1, 2)
+    K = mha.W_k(x).view(B, T, H, d).transpose(1, 2)
+    V = mha.W_v(x).view(B, T, H, d).transpose(1, 2)
+    scores = Q @ K.transpose(-2, -1) / math.sqrt(d)
+    scores = scores.masked_fill(mha.mask[:T, :T], float("-inf"))
+    weights = torch.softmax(scores, dim=-1)
+    out = (weights @ V).transpose(1, 2).contiguous().view(B, T, C)
+    return mha.W_o(out)
+
+
+def test_fused_matches_manual_attention(cfg, sample_input):
+    torch.manual_seed(0)
+    mha = MultiHeadAttention(cfg).eval()
+    assert torch.allclose(mha(sample_input), _manual_mha_forward(mha, sample_input), atol=1e-5)
+
+
+def test_fused_matches_manual_gradients(cfg, sample_input):
+    torch.manual_seed(0)
+    mha = MultiHeadAttention(cfg).eval()
+    x1 = sample_input.detach().clone().requires_grad_(True)
+    x2 = sample_input.detach().clone().requires_grad_(True)
+    mha(x1).sum().backward()
+    g_fused = [p.grad.clone() for p in mha.parameters()]
+    mha.zero_grad()
+    _manual_mha_forward(mha, x2).sum().backward()
+    for a, b in zip(g_fused, [p.grad for p in mha.parameters()]):
+        assert torch.allclose(a, b, atol=1e-4)
+    assert torch.allclose(x1.grad, x2.grad, atol=1e-4)
+
+
+def test_fused_works_for_sequences_shorter_than_context(cfg):
+    mha = MultiHeadAttention(cfg).eval()
+    x = torch.randn(2, cfg.context_length // 2, cfg.emb_dim)
+    assert torch.allclose(mha(x), _manual_mha_forward(mha, x), atol=1e-5)
+
+
+def test_fused_is_causal(cfg):
+    # changing a future token must not change earlier positions
+    mha = MultiHeadAttention(cfg).eval()
+    x = torch.randn(1, 8, cfg.emb_dim)
+    y = x.clone()
+    y[:, -1] += 5.0
+    assert torch.allclose(mha(x)[:, :-1], mha(y)[:, :-1], atol=1e-6)
+
+
+def test_mask_buffer_still_in_state_dict(cfg):
+    # older checkpoints contain 'mask'; keeping the buffer lets them load
+    assert any(k.endswith("mask") for k in MultiHeadAttention(cfg).state_dict())

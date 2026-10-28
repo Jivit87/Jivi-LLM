@@ -1,0 +1,47 @@
+{
+  "pmc_oa": {
+    "in": 43862,
+    "contaminated": 11,
+    "exact_dup": 0,
+    "pmc_overlap": 0,
+    "kept": 43851,
+    "chars": 1503038619,
+    "est_tokens": 357866337
+  },
+  "pubmed_abstracts": {
+    "in": 146337,
+    "contaminated": 1,
+    "exact_dup": 12,
+    "pmc_overlap": 2,
+    "kept": 146322,
+    "chars": 254841521,
+    "est_tokens": 60676552
+  },
+  "guidelines": {
+    "in": 25515,
+    "contaminated": 26,
+    "exact_dup": 2,
+    "pmc_overlap": 0,
+    "kept": 25487,
+    "chars": 267805448,
+    "est_tokens": 63763201
+  },
+  "reference": {
+    "in": 1743,
+    "contaminated": 0,
+    "exact_dup": 0,
+    "pmc_overlap": 0,
+    "kept": 1743,
+    "chars": 30139433,
+    "est_tokens": 7176055
+  },
+  "general_replay": {
+    "in": 57897,
+    "contaminated": 4,
+    "exact_dup": 21,
+    "pmc_overlap": 0,
+    "kept": 57872,
+    "chars": 344139744,
+    "est_tokens": 81938034
+  }
+}

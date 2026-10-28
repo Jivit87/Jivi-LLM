@@ -1,0 +1,31 @@
+{
+  "shard": 4,
+  "paras_seen": 3792135,
+  "articles_seen": 108444,
+  "articles_kept": 27408,
+  "chars_kept": 1001401262,
+  "by_type": {
+    "study": 25880,
+    "clinical_case": 770,
+    "review": 758
+  },
+  "docs_written": 27408,
+  "est_tokens": 238428871,
+  "seconds": 32,
+  "download_seconds": 0,
+  "params": {
+    "shards": [
+      4
+    ],
+    "all": false,
+    "tau_edu": 4.15,
+    "review_delta": 0.2,
+    "case_delta": 0.4,
+    "p_min": 3.5,
+    "min_paras": 8,
+    "min_chars": 4000,
+    "delete_shards": true,
+    "force": false,
+    "workers": 1
+  }
+}

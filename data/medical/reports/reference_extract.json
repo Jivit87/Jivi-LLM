@@ -1,0 +1,11 @@
+{
+  "medlineplus": {
+    "docs": 1013,
+    "est_tokens": 512825
+  },
+  "openfda": {
+    "docs": 730,
+    "est_tokens": 6662872,
+    "unique_generics": 730
+  }
+}

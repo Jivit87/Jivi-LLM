@@ -11,6 +11,7 @@ class GPTConfig:
     n_layers: int
     dropout: float
     qkv_bias: bool
+    tie_weights: bool = False  # share the input embedding with the output head (saves vocab_size * emb_dim params)
 
     def __post_init__(self):
         assert self.emb_dim % self.n_heads == 0, (

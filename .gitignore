@@ -42,3 +42,11 @@ checkpoints/
 data/raw/
 data/processed/
 logs/
+
+# Medical-domain data (keep folder skeleton + manifest/reports, ignore the bulk data)
+data/medical/raw/**
+data/medical/interim/**
+data/medical/filtered/**
+data/medical/tokenized/**
+data/medical/eval/**
+!data/medical/**/.gitkeep

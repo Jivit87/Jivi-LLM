@@ -70,6 +70,9 @@ class GPTModel(nn.Module):
 
         # output head: project from emb_dim to vocal logits
         self.lm_head = nn.Linear(cfg.emb_dim, cfg.vocab_size, bias=False)
+        if getattr(cfg, "tie_weights", False):
+            # output head reuses the token embedding matrix (one shared parameter)
+            self.lm_head.weight = self.emb.tok_emb.weight
 
     def forward(self, x):
         # x: (B, T)

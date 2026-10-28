@@ -1,7 +1,7 @@
 import torch
 import os
 
-def save_checkpoints(path, model, optimizer, step, config, metrics=None):
+def save_checkpoints(path, model, optimizer, step, config, metrics=None, tokenizer="gpt2"):
     # saving everything needed to resume training 
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -11,7 +11,7 @@ def save_checkpoints(path, model, optimizer, step, config, metrics=None):
         "optimizer_state": optimizer.state_dict(),
         "config": vars(config),
         "metrics": metrics or {},
-        "tokenizer": "gpt2"
+        "tokenizer": tokenizer  # tiktoken name, or path to a custom tokenizer.json
     }, path)
 
     print(f"Checkpoint saved: {path}")

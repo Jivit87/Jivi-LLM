@@ -1,0 +1,46 @@
+{
+  "file": "pubmed26n1068.xml.gz",
+  "articles": 30000,
+  "kept": 9261,
+  "chars": 15905103,
+  "dropped": {
+    "copyright_notice": 14507,
+    "no_abstract": 3440,
+    "too_short": 1867,
+    "not_english": 498,
+    "bad_type": 369,
+    "too_long": 57,
+    "too_old": 1
+  },
+  "est_tokens": 3786929,
+  "params": {
+    "files": [
+      1000,
+      1017,
+      1034,
+      1051,
+      1068,
+      1085,
+      1102,
+      1119,
+      1136,
+      1153,
+      1170,
+      1187,
+      1204,
+      1221,
+      1238,
+      1255,
+      1272,
+      1289,
+      1306,
+      1323
+    ],
+    "min_year": 2012,
+    "min_words": 150,
+    "max_words": 450,
+    "require_mesh": false,
+    "allow_copyrighted": false,
+    "keep_raw": false
+  }
+}

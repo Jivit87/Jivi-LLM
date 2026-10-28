@@ -1,0 +1,25 @@
+{
+  "file": "pubmed26n1334.xml.gz",
+  "articles": 4989,
+  "kept": 765,
+  "chars": 1401631,
+  "dropped": {
+    "copyright_notice": 2986,
+    "no_abstract": 878,
+    "bad_type": 101,
+    "too_short": 175,
+    "not_english": 79,
+    "too_long": 5
+  },
+  "est_tokens": 333721,
+  "params": {
+    "files": [
+      1334
+    ],
+    "min_year": 2012,
+    "min_words": 150,
+    "max_words": 450,
+    "require_mesh": false,
+    "keep_raw": false
+  }
+}

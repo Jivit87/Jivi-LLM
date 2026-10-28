@@ -1,0 +1,11 @@
+{
+  "seen": 259878,
+  "kept": 57897,
+  "tokens": 75000065,
+  "params": {
+    "tokens": 75000000.0,
+    "min_score": 3.2,
+    "min_chars": 1500,
+    "shard_docs": 50000
+  }
+}

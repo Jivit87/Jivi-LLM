@@ -1,0 +1,139 @@
+{
+  "vocab_size": 32000,
+  "eot_id": 0,
+  "sha256": "c5dcece79e6bbfa109f8b2e09992ab2d07ff148c9c60948293e8b00b8dc94f1f",
+  "sample_chars": 1500000000.0,
+  "mix": {
+    "pmc_oa": 0.5,
+    "pubmed_abstracts": 0.12,
+    "guidelines": 0.1,
+    "reference": 0.03,
+    "general_replay": 0.25
+  },
+  "held_out": {
+    "pmc_oa": {
+      "docs": 150,
+      "tokens_per_1k_chars_medbpe": 203.2,
+      "tokens_per_1k_chars_gpt2": 225.2,
+      "medbpe_vs_gpt2": 0.902
+    },
+    "pubmed_abstracts": {
+      "docs": 150,
+      "tokens_per_1k_chars_medbpe": 206.2,
+      "tokens_per_1k_chars_gpt2": 219.0,
+      "medbpe_vs_gpt2": 0.942
+    },
+    "guidelines": {
+      "docs": 150,
+      "tokens_per_1k_chars_medbpe": 215.5,
+      "tokens_per_1k_chars_gpt2": 228.8,
+      "medbpe_vs_gpt2": 0.942
+    },
+    "reference": {
+      "docs": 6,
+      "tokens_per_1k_chars_medbpe": 205.9,
+      "tokens_per_1k_chars_gpt2": 232.0,
+      "medbpe_vs_gpt2": 0.887
+    },
+    "general_replay": {
+      "docs": 150,
+      "tokens_per_1k_chars_medbpe": 222.4,
+      "tokens_per_1k_chars_gpt2": 214.4,
+      "medbpe_vs_gpt2": 1.038
+    }
+  },
+  "terms": {
+    "lymphoma": {
+      "medbpe": 1,
+      "gpt2": 2
+    },
+    "acetyltransferase": {
+      "medbpe": 1,
+      "gpt2": 4
+    },
+    "thrombocytopenia": {
+      "medbpe": 1,
+      "gpt2": 7
+    },
+    "cytotoxicity": {
+      "medbpe": 1,
+      "gpt2": 3
+    },
+    "hypertension": {
+      "medbpe": 1,
+      "gpt2": 1
+    },
+    "methotrexate": {
+      "medbpe": 1,
+      "gpt2": 4
+    },
+    "immunohistochemistry": {
+      "medbpe": 1,
+      "gpt2": 4
+    },
+    "electrocardiogram": {
+      "medbpe": 1,
+      "gpt2": 4
+    },
+    "glomerulonephritis": {
+      "medbpe": 1,
+      "gpt2": 6
+    },
+    "SARS-CoV-2": {
+      "medbpe": 5,
+      "gpt2": 7
+    },
+    "randomized": {
+      "medbpe": 1,
+      "gpt2": 1
+    },
+    "metformin": {
+      "medbpe": 1,
+      "gpt2": 3
+    },
+    "atrial fibrillation": {
+      "medbpe": 2,
+      "gpt2": 5
+    },
+    "pneumonia": {
+      "medbpe": 1,
+      "gpt2": 1
+    },
+    "carcinoma": {
+      "medbpe": 1,
+      "gpt2": 2
+    },
+    "pharmacokinetics": {
+      "medbpe": 1,
+      "gpt2": 3
+    },
+    "hemoglobin": {
+      "medbpe": 1,
+      "gpt2": 2
+    },
+    "myocardial infarction": {
+      "medbpe": 2,
+      "gpt2": 6
+    },
+    "polymerase chain reaction": {
+      "medbpe": 3,
+      "gpt2": 4
+    },
+    "anticoagulant": {
+      "medbpe": 1,
+      "gpt2": 5
+    },
+    "the": {
+      "medbpe": 1,
+      "gpt2": 1
+    },
+    "children": {
+      "medbpe": 1,
+      "gpt2": 1
+    },
+    "therefore": {
+      "medbpe": 1,
+      "gpt2": 1
+    }
+  }
+}

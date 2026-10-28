@@ -1,0 +1,10 @@
+{
+  "pubmedqa/train": 1000,
+  "medmcqa/train": 182822,
+  "medmcqa/test": 6150,
+  "medmcqa/validation": 4183,
+  "medqa": "FAILED ConnectError: [Errno -3] Temporary failure in name resolution",
+  "mmlu_medical/test": 1561,
+  "mmlu_medical/validation": 174,
+  "mmlu_medical/dev": 40
+}

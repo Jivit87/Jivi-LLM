@@ -1,0 +1,29 @@
+{
+  "files": 7,
+  "candidates": 263368,
+  "selected": 43862,
+  "est_tokens": 358001123,
+  "score_cutoff": 4.289,
+  "tokens_by_type": {
+    "review": 42812097,
+    "clinical_case": 10686409,
+    "study": 304502616
+  },
+  "docs_per_shard": {
+    "commercial-00000.jsonl": 6144,
+    "commercial-00004.jsonl": 6434,
+    "commercial-00008.jsonl": 5281,
+    "commercial-00012.jsonl": 6662,
+    "commercial-00016.jsonl": 6953,
+    "commercial-00020.jsonl": 6284,
+    "commercial-00024.jsonl": 6104
+  },
+  "params": {
+    "target_tokens": 358000000.0,
+    "case_share": 0.1,
+    "review_share": 0.3,
+    "min_case_edu": 3.9,
+    "min_case_share": 0.06,
+    "min_review_share": 0.15
+  }
+}

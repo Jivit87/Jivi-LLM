@@ -1,0 +1,17 @@
+source,license,commercial_ok,redistribute_text,use_in_default_mix,notes
+pmc_oa_commercial,CC0/CC BY/CC BY-SA/CC BY-ND (per article),yes,per-article license,yes,filter on per-article JSON license; keep license per doc
+pmc_oa_noncommercial,CC BY-NC*,no,no,no,optional research-only shard
+pubmed_abstracts,NLM terms; some abstracts copyrighted,unclear,no,yes,train on them but do not redistribute raw abstracts
+guidelines_cdc,Mostly US-government public domain; some third-party material excepted (cdc.gov/other/agencymaterials.html),yes,yes,yes,include; checked 2026-10-28
+guidelines_wikidoc,CC BY-SA 3.0 (per search results; verify on wikidoc.org),yes,share-alike,yes,include; drop stubs <1500 chars; share-alike noted
+guidelines_who,CC BY-NC-SA 3.0 IGO (who.int/copyright),no,no,no,non-commercial: excluded from default mix
+guidelines_nice,NICE UK Open Content Licence; AI-use requests explicitly NOT covered,no,no,no,excluded: licence says AI purposes are not covered
+guidelines_cco,Cancer Care Ontario: reproduction needs written permission,no,no,no,excluded
+guidelines_pubmed,"PMC/PubMed articles, per-article license unknown here",unclear,no,no,"excluded: overlaps the PMC pipeline, which filters per-article license"
+guidelines_cma_icrc_spor,not yet checked,unknown,unknown,no,held back pending license check (about 6M tokens total)
+medlineplus,public domain parts only,yes,yes,yes,keep only public-domain content
+wikipedia_medicine,CC BY-SA 4.0 (unverified this session),yes,share-alike,yes,verify; share-alike
+bookshelf_oa,per-book,per-book,per-book,maybe,check each book; StatPearls is CC BY-NC-ND so exclude
+openfda,CC0,yes,yes,yes,cap share (templated text)
+dailymed,ODbL (unverified),yes,share-alike,maybe,verify terms
+fineweb_edu,ODC-By (underlying pages copyrighted),yes,n/a,yes,general replay + optional medical web slice
