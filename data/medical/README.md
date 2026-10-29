@@ -1,6 +1,6 @@
 # Medical corpus
 
-Research and decisions live in `../../med_domain.md`. Read it first.
+Research and decisions live in `../../docs/med_domain.md`. Read it first.
 
 Target: about 500M unique tokens for a ~124M GPT. Mixture and licenses: `manifest/`.
 

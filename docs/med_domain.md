@@ -456,3 +456,48 @@ Re-ran `07` with `--target-tokens 358e6` (quality cutoff for studies about 4.29,
 - `GPTConfig.tie_weights` (default False) and tying in `GPTModel`; `configs/med_124m.yaml` = 32k vocab, 14 layers, d=768, 12 heads, ctx 1024, tied: **124.56M params**.
 - `get_tokenizer()` accepts a path to a custom `tokenizer.json`; `save_checkpoints(..., tokenizer=...)` records it. Tests: 25 pass (6 new in `tests/test_med_domain.py`).
 - Still to do: a medical training script (`train_med.py`) that memory-maps `tokenized/<source>/train.bin`, samples by mix weights, and evaluates per-source validation perplexity.
+
+---
+
+## 13. Training run `med124m_v1` (2026-10-28 to 10-29)
+
+Script `train_med.py`, config `configs/med_124m.yaml` (124.56M params, 14 layers, d=768, tied embeddings, ctx 1024), fused attention + `torch.compile` (max-autotune-no-cudagraphs).
+
+- **Settings:** 1.5B tokens (3.0 passes over the 493.1M-token train corpus), 131,072 tokens/step, 11,444 steps, peak LR 6e-4 (chosen from a 3-way pilot: 3e-4 gave val 5.79, 6e-4 gave 5.67, 1e-3 gave 6.00 at 30M tokens), 300-step warmup, flat until 80%, cosine decay to 6e-5, AdamW (0.9, 0.95), weight decay 0.1, grad clip 1.0, dropout 0, bf16 autocast, GPT-2 style init (std 0.02, residual projections scaled by 1/sqrt(2*layers)). Sources sampled in proportion to size (so each source got about 3 epochs).
+- **Speed:** 68,300 tokens/s sustained, 6.17 hours total. No loss spikes in the whole run; grad norm settled near 0.23 to 0.3.
+- **Final validation loss (nats per token, custom tokenizer):** mix 2.756 (perplexity about 15.7); PMC 2.671 (14.5); guidelines 2.537 (12.6); abstracts 2.730 (15.3); reference 1.682 (5.4); general English 3.362 (28.8). Progress of the mix loss: 4.69 (step 500), 3.31 (2,000), 3.05 (4,500), 2.93 (7,750), 2.89 (9,500, decay starts at 9,155), 2.76 (11,444).
+- **Overfitting:** none seen; train loss about 2.6 to 2.8 vs val 2.76 at the end.
+- **Generated samples at the end:** fluent, clinical in style. Metformin is now described as an oral anti-diabetic agent (the earlier sulfonylurea error is gone) but with an invented mechanism ("inhibits glycolysis in muscle cells"); the pneumonia prompt names *Streptococcus pneumoniae*; the chronic-kidney-disease prompt produced made-up research-paper phrasing ("supported by our results"). The general-English prompt drifts to genes. **Fluent but not factually reliable. Not for medical use.**
+- **Checkpoints:** `checkpoints/med124m_v1/step_{001000..011444}.pt` (1.5 GB each, include optimizer state) and `latest.pt`. A weights-only export for inference would be about 0.5 GB.
+- Perplexities are per token of the custom 32k tokenizer, so they are not comparable with GPT-2-tokenizer numbers.
+
+### Not done yet
+Held-out benchmark evaluation (PubMedQA, MedMCQA, MedQA, MMLU-medical) with a random-init and a GPT-2-124M baseline; a weights-only export; sampling from the final model with different prompts/temperatures; optional further training on more unique data (see section 12 notes).
+
+---
+
+## 14. Evaluation of `med124m_v1` (2026-10-29)
+
+Script `eval_med.py`, results in `data/medical/reports/eval_results.json`. Zero-shot, no few-shot examples, no fine-tuning. Baselines: chance (25% for 4-option) and OpenAI GPT-2-124M. Multiple choice scored two ways: *cloze* (likelihood of the answer text; `acc_norm` divides by length) and *letter* (likelihood of A/B/C/D after listing the options). 95% confidence interval is about +/-2.4 (MedQA), +/-1.4 (MedMCQA), +/-2.3 (MMLU), +/-3.1 (PubMedQA) points.
+
+| Benchmark (chance) | Medical model: cloze / cloze_norm / letter | GPT-2 124M: cloze / cloze_norm / letter |
+|---|---|---|
+| MedQA 4-option, n=1273 (25%) | 25.3 / 27.3 / 27.7 | 22.2 / 25.8 / 27.7 |
+| MedMCQA validation, n=4183 (25%) | 23.5 / 28.4 / 32.0 | 21.1 / 26.2 / 31.9 |
+| MMLU medical, n=1561 (25%) | 25.5 / 30.8 / 22.8 | 24.5 / 27.5 / 22.6 |
+| PubMedQA, n=1000 (majority "yes" = 55.2%) | 43.3 (418 yes / 582 no / 0 maybe) | 52.2 (724 yes / 276 no / 0 maybe) |
+
+**Bits per byte on held-out text (lower is better; fair across tokenizers):**
+
+| Source | Medical model | GPT-2 | Change |
+|---|---|---|---|
+| PMC full text | 0.706 | 0.917 | -23% |
+| PubMed abstracts | 0.777 | 0.955 | -19% |
+| Guidelines | 0.608 | 0.927 | -34% |
+| Reference (drug labels, MedlinePlus) | 0.581 | 0.784 | -26% |
+| General English | 1.036 | 0.960 | +8% (worse) |
+
+**Reading:** the model models medical *language* far better than GPT-2 (19 to 34% fewer bits per byte) and general English a bit worse. On exam-style questions it is **close to chance**, with only marginal, mostly within-noise edges over GPT-2 (cloze_norm: MedQA +1.5, MedMCQA +2.2, MMLU +3.3). The MedMCQA letter score (32%) is the same for both models, so it is a letter-bias artifact, not knowledge. PubMedQA is below the always-"yes" baseline for both models, and the medical model (43.3%) is worse than GPT-2 (52.2%): it leans "no" and never says "maybe". This matches the literature (a 0.1B medical model is near the floor on MedQA, MedLLM section 1.3): at this size, knowledge-recall and reasoning questions need far more capacity.
+
+### What could raise the numbers
+Fine-tuning on the benchmarks' own training sets (MedQA 10K, MedMCQA 182K, PubMedQA labelled/artificial) is the standard route; MedLLM-0.1B reached about MedMCQA 34.9 and PubMedQA 58.2 after SFT + preference tuning. More unique pretraining data and a larger model are the routes to real knowledge.

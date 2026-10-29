@@ -5,3 +5,8 @@ numpy>=1.26.0
 requests>=2.31.0
 pytest>=8.0.0
 PyYAML
+# medical data pipeline (data_pipeline/) and evaluation (eval_med.py)
+datasets
+huggingface_hub
+pyarrow
+transformers

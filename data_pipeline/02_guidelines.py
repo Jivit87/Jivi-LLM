@@ -13,7 +13,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import INTERIM, RAW, est_tokens, normalize_ws, read_jsonl, save_report, write_jsonl  # noqa: E402
+from common import INTERIM, RAW, est_tokens, fetch, normalize_ws, read_jsonl, save_report, write_jsonl  # noqa: E402
 
 INCLUDE = {"cdc", "wikidoc"}
 LICENSE = {"cdc": "US-gov public domain (mostly)", "wikidoc": "CC BY-SA 3.0"}
@@ -22,6 +22,8 @@ MIN_CHARS = {"cdc": 1500, "wikidoc": 1500}  # drops WikiDoc stubs
 
 def main():
     src = os.path.join(RAW, "guidelines", "open_guidelines.jsonl")
+    if not os.path.exists(src):  # about 880 MB; the Meditron open release of clinical guidelines
+        fetch("https://huggingface.co/datasets/epfl-llm/guidelines/resolve/main/open_guidelines.jsonl", src)
     counts = {}
 
     def docs():

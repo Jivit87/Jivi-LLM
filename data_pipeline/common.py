@@ -1,4 +1,4 @@
-"""Shared helpers for the medical data pipeline (see med_domain.md)."""
+"""Shared helpers for the medical data pipeline (see docs/med_domain.md)."""
 
 import json
 import os
